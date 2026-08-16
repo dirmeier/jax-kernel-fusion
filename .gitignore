@@ -3,4 +3,4 @@ __pycache__/
 *.so
 *.dylib
 .worktrees/
-
+gpu_results.txt

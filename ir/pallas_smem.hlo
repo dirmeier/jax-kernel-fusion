@@ -1,0 +1,54 @@
+HloModule jit_pallas_qk_norm_rope, is_scheduled=true, entry_computation_layout={(f32[4,1024,16,128]{3,2,1,0}, f32[128]{0}, f32[1024,64]{1,0}, f32[1024,64]{1,0})->f32[4,1024,16,128]{3,2,1,0}}, allow_spmd_sharding_propagation_to_parameters={true,true,true,true}, allow_spmd_sharding_propagation_to_output={true}, frontend_attributes={fingerprint_before_lhs="0c5f047733529a6f2bd331e87cf45f5b"}
+
+FileNames
+1 "/users/sdirmeie/jax-kernel-fusion/dump_ir.py"
+2 "/users/sdirmeie/jax-kernel-fusion/02_pallas_smem.py"
+
+FunctionNames
+1 "<module>"
+2 "main"
+3 "dump"
+4 "pallas_qk_norm_rope"
+
+FileLocations
+1 {file_name_id=1 function_name_id=1 line=117 end_line=117 column=2 end_column=8}
+2 {file_name_id=1 function_name_id=2 line=109 end_line=109 column=6 end_column=26}
+3 {file_name_id=1 function_name_id=3 line=70 end_line=70 column=12 end_column=36}
+4 {file_name_id=2 function_name_id=4 line=52 end_line=52 column=13 end_column=50}
+5 {file_name_id=2 function_name_id=4 line=52 end_line=52 column=30 end_column=34}
+6 {file_name_id=2 function_name_id=4 line=51 end_line=51 column=13 end_column=49}
+7 {file_name_id=2 function_name_id=4 line=54 end_line=67 column=8 end_column=57}
+
+StackFrames
+1 {file_location_id=1 parent_frame_id=1}
+2 {file_location_id=2 parent_frame_id=2}
+3 {file_location_id=3 parent_frame_id=3}
+4 {file_location_id=4 parent_frame_id=4}
+5 {file_location_id=5 parent_frame_id=4}
+6 {file_location_id=6 parent_frame_id=4}
+7 {file_location_id=7 parent_frame_id=4}
+
+
+%fused_concatenate (param_0.1: f32[1024,64]) -> f32[1024,128] {
+  %param_0.1 = f32[1024,64]{1,0} parameter(0), metadata={scheduling_name="param_0.1"}
+  %neg.1.1 = f32[1024,64]{1,0} negate(%param_0.1), metadata={op_name="jit(pallas_qk_norm_rope)/neg" scheduling_name="neg.1.1" stack_frame_id=5}
+  ROOT %concatenate.3.1 = f32[1024,128]{1,0} concatenate(%neg.1.1, %param_0.1), dimensions={1}, metadata={op_name="jit(pallas_qk_norm_rope)/concatenate" scheduling_name="concatenate.3.1" stack_frame_id=4}
+}
+
+%wrapped_concatenate_computation (param_0.2: f32[1024,64]) -> f32[1024,128] {
+  %param_0.2 = f32[1024,64]{1,0} parameter(0), metadata={scheduling_name="param_0.2"}
+  ROOT %concatenate.2.1 = f32[1024,128]{1,0} concatenate(%param_0.2, %param_0.2), dimensions={1}, metadata={op_name="jit(pallas_qk_norm_rope)/concatenate" scheduling_name="concatenate.2.1" stack_frame_id=6}
+}
+
+ENTRY %main.1 (q.1: f32[4,1024,16,128], g.1: f32[128], cos.1: f32[1024,64], sin.1: f32[1024,64]) -> f32[4,1024,16,128] {
+  %sin.1 = f32[1024,64]{1,0} parameter(3), metadata={op_name="sin" scheduling_name="sin.1"}
+  %cos.1 = f32[1024,64]{1,0} parameter(2), metadata={op_name="cos" scheduling_name="cos.1"}
+  %g.1 = f32[128]{0} parameter(1), metadata={op_name="g" scheduling_name="g.1"}
+  %bitcast.1.0 = f32[1,128]{1,0} bitcast(%g.1), metadata={op_name="g" scheduling_name="bitcast.1.0"}
+  %q.1 = f32[4,1024,16,128]{3,2,1,0} parameter(0), metadata={op_name="q" scheduling_name="q.1"}
+  %bitcast.3 = f32[65536,128]{1,0} bitcast(%q.1), metadata={op_name="q" scheduling_name="bitcast.3"}
+  %wrapped_concatenate = f32[1024,128]{1,0} fusion(%cos.1), kind=kLoop, calls=%wrapped_concatenate_computation, metadata={op_name="jit(pallas_qk_norm_rope)/concatenate" scheduling_name="wrapped_concatenate" stack_frame_id=6}, backend_config={"device_type":"DEVICE_TYPE_INVALID","force_earliest_schedule":false,"native_emitter_backend_config":{"type":"NATIVE_EMITTER_TYPE_INVALID","unroll_factor":0},"operation_queue_id":"0","reification_cost":[]}
+  %input_concatenate_fusion = f32[1024,128]{1,0} fusion(%sin.1), kind=kInput, calls=%fused_concatenate, metadata={op_name="jit(pallas_qk_norm_rope)/concatenate" scheduling_name="input_concatenate_fusion" stack_frame_id=4}, backend_config={"device_type":"DEVICE_TYPE_INVALID","force_earliest_schedule":false,"native_emitter_backend_config":{"type":"NATIVE_EMITTER_TYPE_INVALID","unroll_factor":0},"operation_queue_id":"0","reification_cost":[]}
+  %pallas_call.1 = f32[65536,128]{1,0} custom-call(%bitcast.3, %bitcast.1.0, %wrapped_concatenate, %input_concatenate_fusion), custom_call_target="mosaic_gpu_v2", operand_layout_constraints={f32[65536,128]{1,0}, f32[1,128]{1,0}, f32[1024,128]{1,0}, f32[1024,128]{1,0}}, api_version=API_VERSION_TYPED_FFI, metadata={op_name="jit(pallas_qk_norm_rope)/pallas_call" scheduling_name="pallas_call.1" stack_frame_id=7}, backend_config={kernel_hash = "O\85I\9D\F3\9DF\E5\C8\08Y\9BC3\02\F7Y\D5\1F\DA\06\A3\EE\ED\1A2\B6\CA\85\CC\13\B1", module = "<truncated 37057 bytes>", use_custom_barrier = false, uses_xla_collective_metadata = false}
+  ROOT %bitcast.2.0 = f32[4,1024,16,128]{3,2,1,0} bitcast(%pallas_call.1), metadata={op_name="jit(pallas_qk_norm_rope)/pallas_call" scheduling_name="bitcast.2.0" stack_frame_id=7}
+}

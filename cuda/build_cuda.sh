@@ -38,6 +38,6 @@ echo "==> building libqk_norm_rope_cuda.so"
   -gencode "arch=compute_${ARCH},code=sm_${ARCH}" \
   ${HOSTCC:+-ccbin "$HOSTCC"} \
   "${INCLUDES[@]}" \
-  qk_norm_rope.cu -o libqk_norm_rope_cuda.so
+  qk_norm_rope.cu qk_norm_rope_tuned.cu -o libqk_norm_rope_cuda.so
 
 echo "built cuda/libqk_norm_rope_cuda.so"

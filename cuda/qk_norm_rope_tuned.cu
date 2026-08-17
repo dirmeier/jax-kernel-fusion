@@ -10,7 +10,7 @@ constexpr float kEps = 1e-6f;
 constexpr unsigned kHeadDim = 128;
 constexpr unsigned kVec4 = kHeadDim / 4;
 constexpr unsigned kHalfVec4 = kHeadDim / 8;
-constexpr unsigned kWarpsPerBlock = 8;
+constexpr unsigned kMaxWarpsPerBlock = 8;
 constexpr unsigned kFullMask = 0xffffffffu;
 
 __device__ __forceinline__ float4 shfl_xor_f4(float4 v, int lane_mask) {
@@ -22,16 +22,31 @@ __device__ __forceinline__ float4 shfl_xor_f4(float4 v, int lane_mask) {
   return r;
 }
 
-__global__ void qk_norm_rope_kernel(const float4* __restrict__ q,
-                                    const float4* __restrict__ g,
-                                    const float4* __restrict__ cos_tab,
-                                    const float4* __restrict__ sin_tab,
-                                    float4* __restrict__ out, unsigned seq,
-                                    unsigned heads, unsigned vectors,
-                                    float eps) {
+__global__ void qk_norm_rope_tuned_kernel(
+    const float4* __restrict__ q, const float4* __restrict__ g,
+    const float4* __restrict__ cos_tab, const float4* __restrict__ sin_tab,
+    float4* __restrict__ out, unsigned seq, unsigned heads, unsigned vectors,
+    unsigned warps_per_block, float eps) {
+  __shared__ float4 s_gamma[kVec4];
+  __shared__ float4 s_cos[kHalfVec4];
+  __shared__ float4 s_sin[kHalfVec4];
+
+  const unsigned block_base = blockIdx.x * warps_per_block;
+  const unsigned pos = (block_base / heads) % seq;
+
+  for (unsigned i = threadIdx.x; i < kVec4; i += blockDim.x) {
+    s_gamma[i] = g[i];
+  }
+  for (unsigned i = threadIdx.x; i < kHalfVec4; i += blockDim.x) {
+    const unsigned row = pos * kHalfVec4 + i;
+    s_cos[i] = cos_tab[row];
+    s_sin[i] = sin_tab[row];
+  }
+  __syncthreads();
+
   const unsigned lane = threadIdx.x & 31u;
   const unsigned warp = threadIdx.x >> 5;
-  const unsigned vec = blockIdx.x * kWarpsPerBlock + warp;
+  const unsigned vec = block_base + warp;
   if (vec >= vectors) return;
 
   const unsigned base = vec * kVec4;
@@ -44,7 +59,7 @@ __global__ void qk_norm_rope_kernel(const float4* __restrict__ q,
   }
   const float inv = rsqrtf(acc / static_cast<float>(kHeadDim) + eps);
 
-  const float4 gg = g[lane];
+  const float4 gg = s_gamma[lane];
   float4 qn;
   qn.x = v.x * inv * gg.x;
   qn.y = v.y * inv * gg.y;
@@ -52,10 +67,8 @@ __global__ void qk_norm_rope_kernel(const float4* __restrict__ q,
   qn.w = v.w * inv * gg.w;
 
   const float4 partner = shfl_xor_f4(qn, 16);
-  const unsigned s = (vec / heads) % seq;
-  const unsigned row = s * kHalfVec4 + (lane & 15u);
-  const float4 c = cos_tab[row];
-  const float4 sn = sin_tab[row];
+  const float4 c = s_cos[lane & 15u];
+  const float4 sn = s_sin[lane & 15u];
   const float sign = (lane < 16u) ? -1.0f : 1.0f;
 
   float4 r;
@@ -66,11 +79,18 @@ __global__ void qk_norm_rope_kernel(const float4* __restrict__ q,
   out[base + lane] = r;
 }
 
-ffi::Error QkNormRopeCudaImpl(cudaStream_t stream, ffi::Buffer<ffi::F32> q,
-                              ffi::Buffer<ffi::F32> g,
-                              ffi::Buffer<ffi::F32> cos,
-                              ffi::Buffer<ffi::F32> sin,
-                              ffi::Result<ffi::Buffer<ffi::F32>> out) {
+static unsigned pick_warps_per_block(unsigned heads) {
+  for (unsigned w = kMaxWarpsPerBlock; w > 1; --w) {
+    if (heads % w == 0) return w;
+  }
+  return 1;
+}
+
+ffi::Error QkNormRopeCudaTunedImpl(cudaStream_t stream, ffi::Buffer<ffi::F32> q,
+                                   ffi::Buffer<ffi::F32> g,
+                                   ffi::Buffer<ffi::F32> cos,
+                                   ffi::Buffer<ffi::F32> sin,
+                                   ffi::Result<ffi::Buffer<ffi::F32>> out) {
   const auto dims = q.dimensions();
   if (dims.size() != 4) {
     return ffi::Error::InvalidArgument("q must have rank 4 [B, S, H, D]");
@@ -94,14 +114,16 @@ ffi::Error QkNormRopeCudaImpl(cudaStream_t stream, ffi::Buffer<ffi::F32> q,
   }
 
   const unsigned vectors = batch * seq * heads;
-  const unsigned blocks = (vectors + kWarpsPerBlock - 1) / kWarpsPerBlock;
+  const unsigned warps = pick_warps_per_block(heads);
+  const unsigned blocks = (vectors + warps - 1) / warps;
 
-  qk_norm_rope_kernel<<<blocks, kWarpsPerBlock * 32, 0, stream>>>(
+  qk_norm_rope_tuned_kernel<<<blocks, warps * 32, 0, stream>>>(
       reinterpret_cast<const float4*>(q.typed_data()),
       reinterpret_cast<const float4*>(g.typed_data()),
       reinterpret_cast<const float4*>(cos.typed_data()),
       reinterpret_cast<const float4*>(sin.typed_data()),
-      reinterpret_cast<float4*>(out->typed_data()), seq, heads, vectors, kEps);
+      reinterpret_cast<float4*>(out->typed_data()), seq, heads, vectors, warps,
+      kEps);
 
   const cudaError_t err = cudaGetLastError();
   if (err != cudaSuccess) {
@@ -111,7 +133,7 @@ ffi::Error QkNormRopeCudaImpl(cudaStream_t stream, ffi::Buffer<ffi::F32> q,
   return ffi::Error::Success();
 }
 
-XLA_FFI_DEFINE_HANDLER_SYMBOL(QkNormRopeCuda, QkNormRopeCudaImpl,
+XLA_FFI_DEFINE_HANDLER_SYMBOL(QkNormRopeCudaTuned, QkNormRopeCudaTunedImpl,
                               ffi::Ffi::Bind()
                                   .Ctx<ffi::PlatformStream<cudaStream_t>>()
                                   .Arg<ffi::Buffer<ffi::F32>>()  // q

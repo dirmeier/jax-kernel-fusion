@@ -4,11 +4,12 @@
 
 > Evaluating JAX kernel fusion using XLA, Pallas and CUDA FFI
 
-`jax-kernel-fusion` implements fused QK-Norm+ROPE operations four ways:
+`jax-kernel-fusion` implements fused QK-Norm+ROPE operations five ways:
 - vanilla XLA (i.e., just implement the ops in Python and let the XLA compiler do the rest),
 - JAX Pallas using Mosaic GPU, with one kernel per head vector,
 - JAX Pallas using Mosaic GPU, with one kernel per `[64, D]` tile,
-- manual CUDA using `jax.ffi`.
+- manual CUDA using `jax.ffi`,
+- manual CUDA using `jax.ffi`, with `gamma` and the rotary tables in SMEM.
 
 The repository implements the following: Let $q \in \mathbb{R}^{B \times S \times H \times D}$ be the query vector of a self-attention mechanism. If $x = q[b, s, h, :]$ is a single attention head vector, QK-Norm+ROPE first normalises over the head dimension
 
@@ -36,7 +37,8 @@ The scripts require a Hopper GPU (i.e., `sm_90`).
 uv run python src/01_baseline.py       # XLA: jaxpr, optimised HLO, timing
 uv run python src/02_pallas_smem.py    # Pallas: one head vector per program
 uv run python src/03_pallas_tiled.py   # Pallas: [64, D] tile per program
-uv run python src/04_ffi_cuda.py       # CUDA, and the comparison table
+uv run python src/04_ffi_cuda.py       # CUDA
+uv run python src/05_ffi_cuda_tuned.py # CUDA: gamma and RoPE tables in SMEM
 ```
 
 ## Results

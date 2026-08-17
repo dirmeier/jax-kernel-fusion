@@ -43,22 +43,25 @@ uv run python src/05_ffi_cuda_tuned.py # CUDA: gamma and RoPE tables in SMEM
 
 ## Results
 
-The different implementations have been measured on a GH200 (which uses a H100 Hopper GPU) using the query dimensionality $(4, 1024, 16, 128)$:
+The different implementations have been measured on a GH200 (which uses a H100 Hopper GPU) using the query dimensionality $(128, 1024, 16, 128)$:
 
-| Mode      | ms    | GB/s  | vs XLA |
-| ------------------- | ----- | ----- | ------ |
-| XLA, compiler-fused | 0.157 | 427.2 | 1.00x  |
-| Pallas, SMEM        | 0.189 | 354.7 | 0.83x  |
-| Pallas, tiled       | 0.165 | 405.7 | 0.95x  |
-| CUDA FFI, manual  | 0.129 | 518.4 | 1.21x  |
+| Mode                | ms    | GB/s   | vs XLA |
+| ------------------- | ----- | ------ | ------ |
+| XLA, compiler-fused | 0.840 | 2555.2 | 1.00x  |
+| Pallas, SMEM        | 1.573 | 1365.6 | 0.53x  |
+| Pallas, tiled       | 0.833 | 2577.3 | 1.01x  |
+| CUDA FFI, manual    | 0.600 | 3576.6 | 1.40x  |
+| CUDA FFI, SMEM      | 1.490 | 1440.9 | 0.56x  |
 
-So CUDA > XLA > Pallas, tiled > Pallas, SMEM. Why is that (I think)?
+So CUDA > Pallas, tiled  >= XLA > CUDA, SMEM > Pallas, SMEM. Why is that?
 
 **Pallas, SMEM**. This Pallas kernel utilizes Shared Memory (SMEM) as a workaround to calculate rotary embeddings without violating hardware memory constraints. This is required because Mosaic GPU's `WG_STRIDED` layout partitions an array equally among the 128 CUDA lanes that form a Pallas thread, so a value needs a multiple of 128 elements to sit in registers. At $D = 128$, we have two 64-wide rotation halves, which fall below that, so the kernel keeps the head vector whole and reaches the partner channel ($i + m$) through SMEM instead.
 
-**Pallas, tiled**. The tiled Pallas kernel takes 64 sequence positions of one head instead, which makes the halves large enough to slice in registers. It needs neither shared memory nor rebuilt tables, and lands within 5% of XLA.
+**Pallas, tiled**. The tiled Pallas kernel takes 64 sequence positions of one head instead, which makes the halves large enough to slice in registers. It needs neither shared memory nor rebuilt tables, and lands within 1% of XLA.
 
 **CUDA**. CUDA wins by assigning one warp (32 threads) to each head vector, rather than forcing it across 128 lanes. This ensures all 128 channels live safely in the registers of a single warp, requiring no workarounds.
+
+**CUDA, SMEM**. This kernel should be faster than the other CUDA kernel, since it doesn't re-read $\gamma$ and the rotary tables from DRAM all the time. Since they are small enough to fit into L1/L2, however, they don't need to be written to SMEM though 😒.
 
 ### HLO
 

@@ -53,12 +53,10 @@ def bench(fn, shape=BENCH_SHAPE, warmup=3, repeats=20):
     jax.block_until_ready(compiled(*args))
   start = time.perf_counter()
   for _ in range(repeats):
-    jax.block_until_ready(compiled(*args))
+    out = compiled(*args)
+  jax.block_until_ready(out)
   return (time.perf_counter() - start) / repeats * 1e3
 
 
 def fused_bytes(shape=BENCH_SHAPE):
-  n = 1
-  for dim in shape:
-    n *= dim
-  return 2 * n * 4
+  return 8 * np.prod(shape)

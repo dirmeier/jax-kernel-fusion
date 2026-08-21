@@ -40,4 +40,3 @@ ENTRY %main.1 (queries.1: f32[128,1024,16,128], gamma.1: f32[128], cos.1: f32[10
   %pallas_call.1 = f32[131072,2048]{1,0} custom-call(%bitcast.2, %wrapped_broadcast, %cos.1, %sin.1), custom_call_target="mosaic_gpu_v2", operand_layout_constraints={f32[131072,2048]{1,0}, f32[64,128]{1,0}, f32[1024,64]{1,0}, f32[1024,64]{1,0}}, api_version=API_VERSION_TYPED_FFI, metadata={op_name="jit(tiled_qk_norm_rope)/pallas_call" scheduling_name="pallas_call.1" stack_frame_id=5}, backend_config={kernel_hash = "\B9?N\E4\82e\DE8T\98T0\B8e\C8,|\BC\00O\CF4\80\FD\97ATJ\F7\EA\D7\B0", module = "<truncated 149342 bytes>", use_custom_barrier = false, uses_xla_collective_metadata = false}
   ROOT %bitcast.1.0 = f32[128,1024,16,128]{3,2,1,0} bitcast(%pallas_call.1), metadata={op_name="jit(tiled_qk_norm_rope)/pallas_call" scheduling_name="bitcast.1.0" stack_frame_id=5}
 }
-

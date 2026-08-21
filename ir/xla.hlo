@@ -90,4 +90,3 @@ ENTRY %main.2 (queries.1: f32[128,1024,16,128], gamma.1: f32[128], cos.1: f32[10
   %queries.1 = f32[128,1024,16,128]{3,2,1,0} parameter(0), metadata={op_name="queries" scheduling_name="queries.1"}
   ROOT %fusion.8 = f32[128,1024,16,128]{3,2,1,0} fusion(%cos.1, %sin.1, %gamma.1, %queries.1), kind=kCustom, calls=%fused_computation.6, metadata={op_name="jit(qk_norm_rope)/concatenate" scheduling_name="fusion.8" stack_frame_id=5}, backend_config={"device_type":"DEVICE_TYPE_INVALID","force_earliest_schedule":false,"fusion_backend_config":{"block_level_fusion_config":{"is_tma_allowed":false,"is_warp_specialization_allowed":false,"num_ctas":1,"num_stages":1,"num_warps":"8","output_tiles":[{"sizes":["8","1","16","64"]}],"waves_per_eu":0},"kind":"__triton"},"operation_queue_id":"0","reification_cost":[]}
 }
-

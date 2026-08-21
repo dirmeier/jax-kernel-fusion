@@ -52,4 +52,3 @@ ENTRY %main.1 (queries.1: f32[128,1024,16,128], gamma.1: f32[128], cos.1: f32[10
   %pallas_call.1 = f32[2097152,128]{1,0} custom-call(%bitcast.3, %bitcast.1.0, %wrapped_concatenate, %input_concatenate_fusion), custom_call_target="mosaic_gpu_v2", operand_layout_constraints={f32[2097152,128]{1,0}, f32[1,128]{1,0}, f32[1024,128]{1,0}, f32[1024,128]{1,0}}, api_version=API_VERSION_TYPED_FFI, metadata={op_name="jit(pallas_qk_norm_rope)/pallas_call" scheduling_name="pallas_call.1" stack_frame_id=7}, backend_config={kernel_hash = "2\13L\09\C6\9B\92:\C5\13\83o\E8r\E6rK\82Nn7u\A7G\0BI*r\C8\E6H%", module = "<truncated 37072 bytes>", use_custom_barrier = false, uses_xla_collective_metadata = false}
   ROOT %bitcast.2.0 = f32[128,1024,16,128]{3,2,1,0} bitcast(%pallas_call.1), metadata={op_name="jit(pallas_qk_norm_rope)/pallas_call" scheduling_name="bitcast.2.0" stack_frame_id=7}
 }
-

@@ -36,3 +36,13 @@ uv run python src/dump_ir.py           # write StableHLO and HLO IRs
 # Alternatively
 bash run_on_gpu.sh
 ```
+
+## Development
+
+The project uses uv for everything:
+
+```bash
+uv sync --all-extras
+uv run pre-commit install -t pre-commit -t commit-msg
+uv run pre-commit run --all-files
+```

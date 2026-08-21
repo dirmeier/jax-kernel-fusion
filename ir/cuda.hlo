@@ -1,8 +1,8 @@
-HloModule jit_cuda_qk_norm_rope, is_scheduled=true, entry_computation_layout={(f32[4,1024,16,128]{3,2,1,0}, f32[128]{0}, f32[1024,64]{1,0}, f32[1024,64]{1,0})->f32[4,1024,16,128]{3,2,1,0}}, allow_spmd_sharding_propagation_to_parameters={true,true,true,true}, allow_spmd_sharding_propagation_to_output={true}, frontend_attributes={fingerprint_before_lhs="f8001241d3f1ba45695dcce108b99be9"}
+HloModule jit_cuda_qk_norm_rope, is_scheduled=true, entry_computation_layout={(f32[128,1024,16,128]{3,2,1,0}, f32[128]{0}, f32[1024,64]{1,0}, f32[1024,64]{1,0})->f32[128,1024,16,128]{3,2,1,0}}, allow_spmd_sharding_propagation_to_parameters={true,true,true,true}, allow_spmd_sharding_propagation_to_output={true}, frontend_attributes={fingerprint_before_lhs="42f1b2214bcf013816ff01687d2bb26d"}
 
 FileNames
-1 "/users/sdirmeie/jax-kernel-fusion/dump_ir.py"
-2 "/users/sdirmeie/jax-kernel-fusion/04_ffi_cuda.py"
+1 "/users/sdirmeie/jax-kernel-fusion/src/dump_ir.py"
+2 "/users/sdirmeie/jax-kernel-fusion/src/04_ffi_cuda.py"
 
 FunctionNames
 1 "<module>"
@@ -11,10 +11,10 @@ FunctionNames
 4 "cuda_qk_norm_rope"
 
 FileLocations
-1 {file_name_id=1 function_name_id=1 line=117 end_line=117 column=2 end_column=8}
-2 {file_name_id=1 function_name_id=2 line=109 end_line=109 column=6 end_column=26}
-3 {file_name_id=1 function_name_id=3 line=70 end_line=70 column=12 end_column=36}
-4 {file_name_id=2 function_name_id=4 line=97 end_line=98 column=9 end_column=70}
+1 {file_name_id=1 function_name_id=1 line=88 end_line=88 column=2 end_column=8}
+2 {file_name_id=1 function_name_id=2 line=82 end_line=82 column=6 end_column=26}
+3 {file_name_id=1 function_name_id=3 line=47 end_line=47 column=12 end_column=36}
+4 {file_name_id=2 function_name_id=4 line=31 end_line=31 column=9 end_column=70}
 
 StackFrames
 1 {file_location_id=1 parent_frame_id=1}
@@ -23,10 +23,11 @@ StackFrames
 4 {file_location_id=4 parent_frame_id=4}
 
 
-ENTRY %main.1 (q.1: f32[4,1024,16,128], g.1: f32[128], cos.1: f32[1024,64], sin.1: f32[1024,64]) -> f32[4,1024,16,128] {
+ENTRY %main.1 (queries.1: f32[128,1024,16,128], gamma.1: f32[128], cos.1: f32[1024,64], sin.1: f32[1024,64]) -> f32[128,1024,16,128] {
   %sin.1 = f32[1024,64]{1,0} parameter(3), metadata={op_name="sin" scheduling_name="sin.1"}
   %cos.1 = f32[1024,64]{1,0} parameter(2), metadata={op_name="cos" scheduling_name="cos.1"}
-  %g.1 = f32[128]{0} parameter(1), metadata={op_name="g" scheduling_name="g.1"}
-  %q.1 = f32[4,1024,16,128]{3,2,1,0} parameter(0), metadata={op_name="q" scheduling_name="q.1"}
-  ROOT %ffi_call.1 = f32[4,1024,16,128]{3,2,1,0} custom-call(%q.1, %g.1, %cos.1, %sin.1), custom_call_target="qk_norm_rope_cuda", operand_layout_constraints={f32[4,1024,16,128]{3,2,1,0}, f32[128]{0}, f32[1024,64]{1,0}, f32[1024,64]{1,0}}, api_version=API_VERSION_TYPED_FFI, metadata={op_name="jit(cuda_qk_norm_rope)/ffi_call" scheduling_name="ffi_call.1" stack_frame_id=4}, backend_config={}
+  %gamma.1 = f32[128]{0} parameter(1), metadata={op_name="gamma" scheduling_name="gamma.1"}
+  %queries.1 = f32[128,1024,16,128]{3,2,1,0} parameter(0), metadata={op_name="queries" scheduling_name="queries.1"}
+  ROOT %ffi_call.1 = f32[128,1024,16,128]{3,2,1,0} custom-call(%queries.1, %gamma.1, %cos.1, %sin.1), custom_call_target="qk_norm_rope_cuda", operand_layout_constraints={f32[128,1024,16,128]{3,2,1,0}, f32[128]{0}, f32[1024,64]{1,0}, f32[1024,64]{1,0}}, api_version=API_VERSION_TYPED_FFI, metadata={op_name="jit(cuda_qk_norm_rope)/ffi_call" scheduling_name="ffi_call.1" stack_frame_id=4}, backend_config={}
 }
+

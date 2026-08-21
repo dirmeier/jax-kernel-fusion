@@ -1,8 +1,8 @@
-HloModule jit_qk_norm_rope, is_scheduled=true, entry_computation_layout={(f32[4,1024,16,128]{3,2,1,0}, f32[128]{0}, f32[1024,64]{1,0}, f32[1024,64]{1,0})->f32[4,1024,16,128]{3,2,1,0}}, allow_spmd_sharding_propagation_to_parameters={true,true,true,true}, allow_spmd_sharding_propagation_to_output={true}, frontend_attributes={fingerprint_before_lhs="abbb55f835e88f85442ec28fea24dfde"}
+HloModule jit_qk_norm_rope, is_scheduled=true, entry_computation_layout={(f32[128,1024,16,128]{3,2,1,0}, f32[128]{0}, f32[1024,64]{1,0}, f32[1024,64]{1,0})->f32[128,1024,16,128]{3,2,1,0}}, allow_spmd_sharding_propagation_to_parameters={true,true,true,true}, allow_spmd_sharding_propagation_to_output={true}, frontend_attributes={fingerprint_before_lhs="0c232557fa3510ab0e199d964272f849"}
 
 FileNames
-1 "/users/sdirmeie/jax-kernel-fusion/dump_ir.py"
-2 "/users/sdirmeie/jax-kernel-fusion/kernel.py"
+1 "/users/sdirmeie/jax-kernel-fusion/src/dump_ir.py"
+2 "/users/sdirmeie/jax-kernel-fusion/src/kernel.py"
 
 FunctionNames
 1 "<module>"
@@ -11,21 +11,21 @@ FunctionNames
 4 "qk_norm_rope"
 
 FileLocations
-1 {file_name_id=1 function_name_id=1 line=117 end_line=117 column=2 end_column=8}
-2 {file_name_id=1 function_name_id=2 line=109 end_line=109 column=6 end_column=26}
-3 {file_name_id=1 function_name_id=3 line=70 end_line=70 column=12 end_column=36}
-4 {file_name_id=2 function_name_id=4 line=72 end_line=72 column=16 end_column=63}
-5 {file_name_id=2 function_name_id=4 line=79 end_line=79 column=9 end_column=69}
-6 {file_name_id=2 function_name_id=4 line=79 end_line=79 column=43 end_column=49}
-7 {file_name_id=2 function_name_id=4 line=79 end_line=79 column=52 end_column=58}
-8 {file_name_id=2 function_name_id=4 line=79 end_line=79 column=26 end_column=32}
-9 {file_name_id=2 function_name_id=4 line=79 end_line=79 column=35 end_column=41}
-10 {file_name_id=2 function_name_id=4 line=76 end_line=76 column=27 end_column=41}
-11 {file_name_id=2 function_name_id=4 line=76 end_line=76 column=11 end_column=25}
-12 {file_name_id=2 function_name_id=4 line=73 end_line=73 column=7 end_column=43}
-13 {file_name_id=2 function_name_id=4 line=73 end_line=73 column=11 end_column=43}
-14 {file_name_id=2 function_name_id=4 line=73 end_line=73 column=25 end_column=42}
-15 {file_name_id=2 function_name_id=4 line=72 end_line=72 column=25 end_column=38}
+1 {file_name_id=1 function_name_id=1 line=88 end_line=88 column=2 end_column=8}
+2 {file_name_id=1 function_name_id=2 line=82 end_line=82 column=6 end_column=26}
+3 {file_name_id=1 function_name_id=3 line=47 end_line=47 column=12 end_column=36}
+4 {file_name_id=2 function_name_id=4 line=30 end_line=30 column=16 end_column=69}
+5 {file_name_id=2 function_name_id=4 line=37 end_line=37 column=9 end_column=69}
+6 {file_name_id=2 function_name_id=4 line=37 end_line=37 column=43 end_column=49}
+7 {file_name_id=2 function_name_id=4 line=37 end_line=37 column=26 end_column=32}
+8 {file_name_id=2 function_name_id=4 line=37 end_line=37 column=52 end_column=58}
+9 {file_name_id=2 function_name_id=4 line=37 end_line=37 column=35 end_column=41}
+10 {file_name_id=2 function_name_id=4 line=34 end_line=34 column=27 end_column=41}
+11 {file_name_id=2 function_name_id=4 line=34 end_line=34 column=11 end_column=25}
+12 {file_name_id=2 function_name_id=4 line=31 end_line=31 column=7 end_column=50}
+13 {file_name_id=2 function_name_id=4 line=31 end_line=31 column=17 end_column=50}
+14 {file_name_id=2 function_name_id=4 line=31 end_line=31 column=31 end_column=49}
+15 {file_name_id=2 function_name_id=4 line=30 end_line=30 column=25 end_column=44}
 
 StackFrames
 1 {file_location_id=1 parent_frame_id=1}
@@ -51,42 +51,43 @@ StackFrames
   ROOT %reduce_sum.5.0 = f32[] add(%reduce_sum.3, %reduce_sum.4), metadata={op_name="jit(qk_norm_rope)/reduce_sum" scheduling_name="reduce_sum.5.0" stack_frame_id=4}
 }
 
-%fused_computation.7 (param_0.20: f32[1024,64], param_1.26: f32[1024,64], param_2.20: f32[128], param_3.15: f32[4,1024,16,128]) -> f32[4,1024,16,128] {
-  %param_3.15 = f32[4,1024,16,128]{3,2,1,0} parameter(3), metadata={scheduling_name="param_3.15"}
-  %square.6 = f32[4,1024,16,128]{3,2,1,0} multiply(%param_3.15, %param_3.15), metadata={op_name="jit(qk_norm_rope)/square" scheduling_name="square.6" stack_frame_id=15}
+%fused_computation.6 (param_0.20: f32[1024,64], param_1.27: f32[1024,64], param_2.20: f32[128], param_3.14: f32[128,1024,16,128]) -> f32[128,1024,16,128] {
+  %param_3.14 = f32[128,1024,16,128]{3,2,1,0} parameter(3), metadata={scheduling_name="param_3.14"}
+  %square.6 = f32[128,1024,16,128]{3,2,1,0} multiply(%param_3.14, %param_3.14), metadata={op_name="jit(qk_norm_rope)/square" scheduling_name="square.6" stack_frame_id=15}
   %constant_29 = f32[] constant(0)
-  %reduce_sum.9 = f32[4,1024,16]{2,1,0} reduce(%square.6, %constant_29), dimensions={3}, to_apply=%region_0.1, metadata={op_name="jit(qk_norm_rope)/reduce_sum" scheduling_name="reduce_sum.9" stack_frame_id=4}
+  %reduce_sum.9 = f32[128,1024,16]{2,1,0} reduce(%square.6, %constant_29), dimensions={3}, to_apply=%region_0.1, metadata={op_name="jit(qk_norm_rope)/reduce_sum" scheduling_name="reduce_sum.9" stack_frame_id=4}
   %constant_28 = f32[] constant(0.0078125)
-  %broadcast.20 = f32[4,1024,16]{2,1,0} broadcast(%constant_28), dimensions={}, metadata={op_name="jit(qk_norm_rope)/div" scheduling_name="broadcast.20" stack_frame_id=4}
-  %multiply.7 = f32[4,1024,16]{2,1,0} multiply(%reduce_sum.9, %broadcast.20), metadata={op_name="jit(qk_norm_rope)/div" scheduling_name="multiply.7" stack_frame_id=4}
+  %broadcast.20 = f32[128,1024,16]{2,1,0} broadcast(%constant_28), dimensions={}, metadata={op_name="jit(qk_norm_rope)/div" scheduling_name="broadcast.20" stack_frame_id=4}
+  %multiply.7 = f32[128,1024,16]{2,1,0} multiply(%reduce_sum.9, %broadcast.20), metadata={op_name="jit(qk_norm_rope)/div" scheduling_name="multiply.7" stack_frame_id=4}
   %constant_27 = f32[] constant(1e-06)
-  %broadcast.19 = f32[4,1024,16]{2,1,0} broadcast(%constant_27), dimensions={}, metadata={op_name="jit(qk_norm_rope)/add" scheduling_name="broadcast.19" stack_frame_id=14}
-  %add.9 = f32[4,1024,16]{2,1,0} add(%multiply.7, %broadcast.19), metadata={op_name="jit(qk_norm_rope)/add" scheduling_name="add.9" stack_frame_id=14}
-  %rsqrt.7 = f32[4,1024,16]{2,1,0} rsqrt(%add.9), metadata={op_name="jit(qk_norm_rope)/rsqrt" scheduling_name="rsqrt.7" stack_frame_id=13}
-  %mul.11 = f32[4,1024,16,128]{3,2,1,0} broadcast(%rsqrt.7), dimensions={0,1,2}, metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.11" stack_frame_id=12}
-  %mul.10 = f32[4,1024,16,128]{3,2,1,0} multiply(%param_3.15, %mul.11), metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.10" stack_frame_id=12}
+  %broadcast.19 = f32[128,1024,16]{2,1,0} broadcast(%constant_27), dimensions={}, metadata={op_name="jit(qk_norm_rope)/add" scheduling_name="broadcast.19" stack_frame_id=14}
+  %add.9 = f32[128,1024,16]{2,1,0} add(%multiply.7, %broadcast.19), metadata={op_name="jit(qk_norm_rope)/add" scheduling_name="add.9" stack_frame_id=14}
+  %rsqrt.7 = f32[128,1024,16]{2,1,0} rsqrt(%add.9), metadata={op_name="jit(qk_norm_rope)/rsqrt" scheduling_name="rsqrt.7" stack_frame_id=13}
+  %mul.11 = f32[128,1024,16,128]{3,2,1,0} broadcast(%rsqrt.7), dimensions={0,1,2}, metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.11" stack_frame_id=12}
+  %mul.10 = f32[128,1024,16,128]{3,2,1,0} multiply(%param_3.14, %mul.11), metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.10" stack_frame_id=12}
   %param_2.20 = f32[128]{0} parameter(2), metadata={scheduling_name="param_2.20"}
-  %mul.30.3 = f32[4,1024,16,128]{3,2,1,0} broadcast(%param_2.20), dimensions={3}, metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.30.3" stack_frame_id=12}
-  %mul.31.3 = f32[4,1024,16,128]{3,2,1,0} multiply(%mul.10, %mul.30.3), metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.31.3" stack_frame_id=12}
-  %slice.2.1 = f32[4,1024,16,64]{3,2,1,0} slice(%mul.31.3), slice={[0:4], [0:1024], [0:16], [0:64]}, metadata={op_name="jit(qk_norm_rope)/slice" scheduling_name="slice.2.1" stack_frame_id=11}
-  %param_1.26 = f32[1024,64]{1,0} parameter(1), metadata={scheduling_name="param_1.26"}
-  %mul.34.10 = f32[4,1024,16,64]{3,2,1,0} broadcast(%param_1.26), dimensions={1,3}, metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.34.10" stack_frame_id=8}
-  %mul.35.5 = f32[4,1024,16,64]{3,2,1,0} multiply(%slice.2.1, %mul.34.10), metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.35.5" stack_frame_id=8}
-  %slice.3.1 = f32[4,1024,16,64]{3,2,1,0} slice(%mul.31.3), slice={[0:4], [0:1024], [0:16], [64:128]}, metadata={op_name="jit(qk_norm_rope)/slice" scheduling_name="slice.3.1" stack_frame_id=10}
+  %mul.30.3 = f32[128,1024,16,128]{3,2,1,0} broadcast(%param_2.20), dimensions={3}, metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.30.3" stack_frame_id=12}
+  %mul.31.3 = f32[128,1024,16,128]{3,2,1,0} multiply(%mul.10, %mul.30.3), metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.31.3" stack_frame_id=12}
+  %slice.2.1 = f32[128,1024,16,64]{3,2,1,0} slice(%mul.31.3), slice={[0:128], [0:1024], [0:16], [0:64]}, metadata={op_name="jit(qk_norm_rope)/slice" scheduling_name="slice.2.1" stack_frame_id=11}
   %param_0.20 = f32[1024,64]{1,0} parameter(0), metadata={scheduling_name="param_0.20"}
-  %mul.38.8 = f32[4,1024,16,64]{3,2,1,0} broadcast(%param_0.20), dimensions={1,3}, metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.38.8" stack_frame_id=9}
-  %mul.39.3 = f32[4,1024,16,64]{3,2,1,0} multiply(%slice.3.1, %mul.38.8), metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.39.3" stack_frame_id=9}
-  %sub.1.3 = f32[4,1024,16,64]{3,2,1,0} subtract(%mul.35.5, %mul.39.3), metadata={op_name="jit(qk_norm_rope)/sub" scheduling_name="sub.1.3" stack_frame_id=8}
-  %mul.43.5 = f32[4,1024,16,64]{3,2,1,0} multiply(%slice.3.1, %mul.34.10), metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.43.5" stack_frame_id=6}
-  %mul.47.5 = f32[4,1024,16,64]{3,2,1,0} multiply(%slice.2.1, %mul.38.8), metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.47.5" stack_frame_id=7}
-  %add.5.3 = f32[4,1024,16,64]{3,2,1,0} add(%mul.43.5, %mul.47.5), metadata={op_name="jit(qk_norm_rope)/add" scheduling_name="add.5.3" stack_frame_id=6}
-  ROOT %concatenate.1.1 = f32[4,1024,16,128]{3,2,1,0} concatenate(%sub.1.3, %add.5.3), dimensions={3}, metadata={op_name="jit(qk_norm_rope)/concatenate" scheduling_name="concatenate.1.1" stack_frame_id=5}
+  %mul.34.10 = f32[128,1024,16,64]{3,2,1,0} broadcast(%param_0.20), dimensions={1,3}, metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.34.10" stack_frame_id=7}
+  %mul.35.5 = f32[128,1024,16,64]{3,2,1,0} multiply(%slice.2.1, %mul.34.10), metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.35.5" stack_frame_id=7}
+  %slice.3.1 = f32[128,1024,16,64]{3,2,1,0} slice(%mul.31.3), slice={[0:128], [0:1024], [0:16], [64:128]}, metadata={op_name="jit(qk_norm_rope)/slice" scheduling_name="slice.3.1" stack_frame_id=10}
+  %param_1.27 = f32[1024,64]{1,0} parameter(1), metadata={scheduling_name="param_1.27"}
+  %mul.38.6 = f32[128,1024,16,64]{3,2,1,0} broadcast(%param_1.27), dimensions={1,3}, metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.38.6" stack_frame_id=9}
+  %mul.39.3 = f32[128,1024,16,64]{3,2,1,0} multiply(%slice.3.1, %mul.38.6), metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.39.3" stack_frame_id=9}
+  %sub.1.3 = f32[128,1024,16,64]{3,2,1,0} subtract(%mul.35.5, %mul.39.3), metadata={op_name="jit(qk_norm_rope)/sub" scheduling_name="sub.1.3" stack_frame_id=7}
+  %mul.43.5 = f32[128,1024,16,64]{3,2,1,0} multiply(%slice.3.1, %mul.34.10), metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.43.5" stack_frame_id=6}
+  %mul.47.3 = f32[128,1024,16,64]{3,2,1,0} multiply(%slice.2.1, %mul.38.6), metadata={op_name="jit(qk_norm_rope)/mul" scheduling_name="mul.47.3" stack_frame_id=8}
+  %add.5.3 = f32[128,1024,16,64]{3,2,1,0} add(%mul.43.5, %mul.47.3), metadata={op_name="jit(qk_norm_rope)/add" scheduling_name="add.5.3" stack_frame_id=6}
+  ROOT %concatenate.1.1 = f32[128,1024,16,128]{3,2,1,0} concatenate(%sub.1.3, %add.5.3), dimensions={3}, metadata={op_name="jit(qk_norm_rope)/concatenate" scheduling_name="concatenate.1.1" stack_frame_id=5}
 }
 
-ENTRY %main.2 (q.1: f32[4,1024,16,128], g.1: f32[128], cos.1: f32[1024,64], sin.1: f32[1024,64]) -> f32[4,1024,16,128] {
+ENTRY %main.2 (queries.1: f32[128,1024,16,128], gamma.1: f32[128], cos.1: f32[1024,64], sin.1: f32[1024,64]) -> f32[128,1024,16,128] {
   %sin.1 = f32[1024,64]{1,0} parameter(3), metadata={op_name="sin" scheduling_name="sin.1"}
   %cos.1 = f32[1024,64]{1,0} parameter(2), metadata={op_name="cos" scheduling_name="cos.1"}
-  %g.1 = f32[128]{0} parameter(1), metadata={op_name="g" scheduling_name="g.1"}
-  %q.1 = f32[4,1024,16,128]{3,2,1,0} parameter(0), metadata={op_name="q" scheduling_name="q.1"}
-  ROOT %fusion.9 = f32[4,1024,16,128]{3,2,1,0} fusion(%sin.1, %cos.1, %g.1, %q.1), kind=kCustom, calls=%fused_computation.7, metadata={op_name="jit(qk_norm_rope)/concatenate" scheduling_name="fusion.9" stack_frame_id=5}, backend_config={"device_type":"DEVICE_TYPE_INVALID","force_earliest_schedule":false,"fusion_backend_config":{"block_level_fusion_config":{"is_tma_allowed":false,"is_warp_specialization_allowed":false,"num_ctas":1,"num_stages":1,"num_warps":"8","output_tiles":[{"sizes":["4","2","16","64"]}],"waves_per_eu":0},"kind":"__triton"},"operation_queue_id":"0","reification_cost":[]}
+  %gamma.1 = f32[128]{0} parameter(1), metadata={op_name="gamma" scheduling_name="gamma.1"}
+  %queries.1 = f32[128,1024,16,128]{3,2,1,0} parameter(0), metadata={op_name="queries" scheduling_name="queries.1"}
+  ROOT %fusion.8 = f32[128,1024,16,128]{3,2,1,0} fusion(%cos.1, %sin.1, %gamma.1, %queries.1), kind=kCustom, calls=%fused_computation.6, metadata={op_name="jit(qk_norm_rope)/concatenate" scheduling_name="fusion.8" stack_frame_id=5}, backend_config={"device_type":"DEVICE_TYPE_INVALID","force_earliest_schedule":false,"fusion_backend_config":{"block_level_fusion_config":{"is_tma_allowed":false,"is_warp_specialization_allowed":false,"num_ctas":1,"num_stages":1,"num_warps":"8","output_tiles":[{"sizes":["8","1","16","64"]}],"waves_per_eu":0},"kind":"__triton"},"operation_queue_id":"0","reification_cost":[]}
 }
+

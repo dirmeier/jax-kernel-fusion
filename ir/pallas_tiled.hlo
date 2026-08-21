@@ -1,8 +1,8 @@
-HloModule jit_tiled_qk_norm_rope, is_scheduled=true, entry_computation_layout={(f32[4,1024,16,128]{3,2,1,0}, f32[128]{0}, f32[1024,64]{1,0}, f32[1024,64]{1,0})->f32[4,1024,16,128]{3,2,1,0}}, allow_spmd_sharding_propagation_to_parameters={true,true,true,true}, allow_spmd_sharding_propagation_to_output={true}, frontend_attributes={fingerprint_before_lhs="933956915e9001ccf4266555e1d2a652"}
+HloModule jit_tiled_qk_norm_rope, is_scheduled=true, entry_computation_layout={(f32[128,1024,16,128]{3,2,1,0}, f32[128]{0}, f32[1024,64]{1,0}, f32[1024,64]{1,0})->f32[128,1024,16,128]{3,2,1,0}}, allow_spmd_sharding_propagation_to_parameters={true,true,true,true}, allow_spmd_sharding_propagation_to_output={true}, frontend_attributes={fingerprint_before_lhs="33b01a50c11f7c4819fb042cc359fa05"}
 
 FileNames
-1 "/users/sdirmeie/jax-kernel-fusion/dump_ir.py"
-2 "/users/sdirmeie/jax-kernel-fusion/03_pallas_tiled.py"
+1 "/users/sdirmeie/jax-kernel-fusion/src/dump_ir.py"
+2 "/users/sdirmeie/jax-kernel-fusion/src/03_pallas_tiled.py"
 
 FunctionNames
 1 "<module>"
@@ -11,11 +11,11 @@ FunctionNames
 4 "tiled_qk_norm_rope"
 
 FileLocations
-1 {file_name_id=1 function_name_id=1 line=117 end_line=117 column=2 end_column=8}
-2 {file_name_id=1 function_name_id=2 line=109 end_line=109 column=6 end_column=26}
-3 {file_name_id=1 function_name_id=3 line=70 end_line=70 column=12 end_column=36}
-4 {file_name_id=2 function_name_id=4 line=107 end_line=107 column=4 end_column=39}
-5 {file_name_id=2 function_name_id=4 line=92 end_line=110 column=8 end_column=3}
+1 {file_name_id=1 function_name_id=1 line=88 end_line=88 column=2 end_column=8}
+2 {file_name_id=1 function_name_id=2 line=82 end_line=82 column=6 end_column=26}
+3 {file_name_id=1 function_name_id=3 line=47 end_line=47 column=12 end_column=36}
+4 {file_name_id=2 function_name_id=4 line=68 end_line=68 column=4 end_column=43}
+5 {file_name_id=2 function_name_id=4 line=53 end_line=71 column=8 end_column=3}
 
 StackFrames
 1 {file_location_id=1 parent_frame_id=1}
@@ -30,13 +30,14 @@ StackFrames
   ROOT %broadcast_in_dim.1.1 = f32[64,128]{1,0} broadcast(%param_0), dimensions={1}, metadata={op_name="jit(tiled_qk_norm_rope)/broadcast_in_dim" scheduling_name="broadcast_in_dim.1.1" stack_frame_id=4}
 }
 
-ENTRY %main.1 (q.1: f32[4,1024,16,128], g.1: f32[128], cos.1: f32[1024,64], sin.1: f32[1024,64]) -> f32[4,1024,16,128] {
+ENTRY %main.1 (queries.1: f32[128,1024,16,128], gamma.1: f32[128], cos.1: f32[1024,64], sin.1: f32[1024,64]) -> f32[128,1024,16,128] {
   %sin.1 = f32[1024,64]{1,0} parameter(3), metadata={op_name="sin" scheduling_name="sin.1"}
   %cos.1 = f32[1024,64]{1,0} parameter(2), metadata={op_name="cos" scheduling_name="cos.1"}
-  %g.1 = f32[128]{0} parameter(1), metadata={op_name="g" scheduling_name="g.1"}
-  %q.1 = f32[4,1024,16,128]{3,2,1,0} parameter(0), metadata={op_name="q" scheduling_name="q.1"}
-  %bitcast.2 = f32[4096,2048]{1,0} bitcast(%q.1), metadata={op_name="q" scheduling_name="bitcast.2"}
-  %wrapped_broadcast = f32[64,128]{1,0} fusion(%g.1), kind=kLoop, calls=%wrapped_broadcast_computation, metadata={op_name="jit(tiled_qk_norm_rope)/broadcast_in_dim" scheduling_name="wrapped_broadcast" stack_frame_id=4}, backend_config={"device_type":"DEVICE_TYPE_INVALID","force_earliest_schedule":false,"native_emitter_backend_config":{"type":"NATIVE_EMITTER_TYPE_INVALID","unroll_factor":0},"operation_queue_id":"0","reification_cost":[]}
-  %pallas_call.1 = f32[4096,2048]{1,0} custom-call(%bitcast.2, %wrapped_broadcast, %cos.1, %sin.1), custom_call_target="mosaic_gpu_v2", operand_layout_constraints={f32[4096,2048]{1,0}, f32[64,128]{1,0}, f32[1024,64]{1,0}, f32[1024,64]{1,0}}, api_version=API_VERSION_TYPED_FFI, metadata={op_name="jit(tiled_qk_norm_rope)/pallas_call" scheduling_name="pallas_call.1" stack_frame_id=5}, backend_config={kernel_hash = "\F2\87\85\CC\81T\C3\EB\E6\F6\09\B3\0E \FBS?\90\0B\A1\D3\A7\97\FAs\9B\F4\1FT\F1\E9>", module = "<truncated 149369 bytes>", use_custom_barrier = false, uses_xla_collective_metadata = false}
-  ROOT %bitcast.1.0 = f32[4,1024,16,128]{3,2,1,0} bitcast(%pallas_call.1), metadata={op_name="jit(tiled_qk_norm_rope)/pallas_call" scheduling_name="bitcast.1.0" stack_frame_id=5}
+  %gamma.1 = f32[128]{0} parameter(1), metadata={op_name="gamma" scheduling_name="gamma.1"}
+  %queries.1 = f32[128,1024,16,128]{3,2,1,0} parameter(0), metadata={op_name="queries" scheduling_name="queries.1"}
+  %bitcast.2 = f32[131072,2048]{1,0} bitcast(%queries.1), metadata={op_name="queries" scheduling_name="bitcast.2"}
+  %wrapped_broadcast = f32[64,128]{1,0} fusion(%gamma.1), kind=kLoop, calls=%wrapped_broadcast_computation, metadata={op_name="jit(tiled_qk_norm_rope)/broadcast_in_dim" scheduling_name="wrapped_broadcast" stack_frame_id=4}, backend_config={"device_type":"DEVICE_TYPE_INVALID","force_earliest_schedule":false,"native_emitter_backend_config":{"type":"NATIVE_EMITTER_TYPE_INVALID","unroll_factor":0},"operation_queue_id":"0","reification_cost":[]}
+  %pallas_call.1 = f32[131072,2048]{1,0} custom-call(%bitcast.2, %wrapped_broadcast, %cos.1, %sin.1), custom_call_target="mosaic_gpu_v2", operand_layout_constraints={f32[131072,2048]{1,0}, f32[64,128]{1,0}, f32[1024,64]{1,0}, f32[1024,64]{1,0}}, api_version=API_VERSION_TYPED_FFI, metadata={op_name="jit(tiled_qk_norm_rope)/pallas_call" scheduling_name="pallas_call.1" stack_frame_id=5}, backend_config={kernel_hash = "\B9?N\E4\82e\DE8T\98T0\B8e\C8,|\BC\00O\CF4\80\FD\97ATJ\F7\EA\D7\B0", module = "<truncated 149342 bytes>", use_custom_barrier = false, uses_xla_collective_metadata = false}
+  ROOT %bitcast.1.0 = f32[128,1024,16,128]{3,2,1,0} bitcast(%pallas_call.1), metadata={op_name="jit(tiled_qk_norm_rope)/pallas_call" scheduling_name="bitcast.1.0" stack_frame_id=5}
 }
+

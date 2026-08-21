@@ -1,12 +1,12 @@
 module @jit_pallas_qk_norm_rope attributes {mhlo.num_partitions = 1 : i32, mhlo.num_replicas = 1 : i32} {
-  func.func public @main(%arg0: tensor<4x1024x16x128xf32>, %arg1: tensor<128xf32>, %arg2: tensor<1024x64xf32>, %arg3: tensor<1024x64xf32>) -> (tensor<4x1024x16x128xf32> {jax.result_info = "result"}) {
+  func.func public @main(%arg0: tensor<128x1024x16x128xf32>, %arg1: tensor<128xf32>, %arg2: tensor<1024x64xf32>, %arg3: tensor<1024x64xf32>) -> (tensor<128x1024x16x128xf32> {jax.result_info = "result"}) {
     %0 = stablehlo.concatenate %arg2, %arg2, dim = 1 : (tensor<1024x64xf32>, tensor<1024x64xf32>) -> tensor<1024x128xf32>
     %1 = stablehlo.negate %arg3 : tensor<1024x64xf32>
     %2 = stablehlo.concatenate %1, %arg3, dim = 1 : (tensor<1024x64xf32>, tensor<1024x64xf32>) -> tensor<1024x128xf32>
-    %3 = stablehlo.reshape %arg0 : (tensor<4x1024x16x128xf32>) -> tensor<65536x128xf32>
+    %3 = stablehlo.reshape %arg0 : (tensor<128x1024x16x128xf32>) -> tensor<2097152x128xf32>
     %4 = stablehlo.reshape %arg1 : (tensor<128xf32>) -> tensor<1x128xf32>
-    %5 = stablehlo.custom_call @mosaic_gpu_v2(%3, %4, %0, %2) {backend_config = "", mhlo.backend_config = {kernel_hash = "O\85I\9D\F3\9DF\E5\C8\08Y\9BC3\02\F7Y\D5\1F\DA\06\A3\EE\ED\1A2\B6\CA\85\CC\13\B1", module = "<truncated 37057 bytes>", use_custom_barrier = false, uses_xla_collective_metadata = false}, operand_layouts = [dense<[1, 0]> : tensor<2xindex>, dense<[1, 0]> : tensor<2xindex>, dense<[1, 0]> : tensor<2xindex>, dense<[1, 0]> : tensor<2xindex>], result_layouts = [dense<[1, 0]> : tensor<2xindex>]} : (tensor<65536x128xf32>, tensor<1x128xf32>, tensor<1024x128xf32>, tensor<1024x128xf32>) -> tensor<65536x128xf32>
-    %6 = stablehlo.reshape %5 : (tensor<65536x128xf32>) -> tensor<4x1024x16x128xf32>
-    return %6 : tensor<4x1024x16x128xf32>
+    %5 = stablehlo.custom_call @mosaic_gpu_v2(%3, %4, %0, %2) {backend_config = "", mhlo.backend_config = {kernel_hash = "2\13L\09\C6\9B\92:\C5\13\83o\E8r\E6rK\82Nn7u\A7G\0BI*r\C8\E6H%", module = "<truncated 37072 bytes>", use_custom_barrier = false, uses_xla_collective_metadata = false}, operand_layouts = [dense<[1, 0]> : tensor<2xindex>, dense<[1, 0]> : tensor<2xindex>, dense<[1, 0]> : tensor<2xindex>, dense<[1, 0]> : tensor<2xindex>], result_layouts = [dense<[1, 0]> : tensor<2xindex>]} : (tensor<2097152x128xf32>, tensor<1x128xf32>, tensor<1024x128xf32>, tensor<1024x128xf32>) -> tensor<2097152x128xf32>
+    %6 = stablehlo.reshape %5 : (tensor<2097152x128xf32>) -> tensor<128x1024x16x128xf32>
+    return %6 : tensor<128x1024x16x128xf32>
   }
 }

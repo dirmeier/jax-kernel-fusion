@@ -6,7 +6,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-BENCH_SHAPE = (4, 1024, 16, 128)
+BENCH_SHAPE = (128, 1024, 16, 128)
 CHECK_SHAPE = (2, 32, 4, 128)
 
 
